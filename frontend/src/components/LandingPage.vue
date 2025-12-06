@@ -18,7 +18,7 @@
 
       <!-- Heading -->
       <div class="heading">
-        <h1>Find Your the <span>New Furry</span><br />Best Friend</h1>
+        <h1>Find Your thw <span>New Furry</span><br />Best Friend</h1>
       </div>
 
       <!-- Subtitle -->
