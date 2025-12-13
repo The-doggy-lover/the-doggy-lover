@@ -91,4 +91,4 @@ if (require.main === module) {
 }
 
 /* export serverless handler for Vercel */
-module.exports = serverless(app);
+module.exports = app;
