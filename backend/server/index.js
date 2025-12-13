@@ -15,6 +15,11 @@ const breedsRouter = require('./routes/breeds');
 
 const app = express();
 
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', message: 'backend is alive 🫀' });
+});
+
+
 /**
  * Allowed origins: only your front-end domains.
  * Use exact origins (don't use "*") because you need cookies/credentials.
