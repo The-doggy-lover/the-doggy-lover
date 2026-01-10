@@ -3,7 +3,6 @@ require('dotenv').config();
 require('dotenv').config({ path: '.env.local' });
 
 const express = require('express');
-const session = require('express-session');
 const cors = require('cors');
 const path = require('path');
 
@@ -60,20 +59,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* Session cookie — note secure/sameSite settings for cross-domain cookies */
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'change-me-in-prod',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    // If front+backend are on different domains and you want cookies shared,
-    // you must set sameSite: 'none' and secure: true (HTTPS).
-    sameSite: (process.env.COOKIE_SAMESITE || 'lax'),
-    maxAge: 1000 * 60 * 60 * 24
-  }
-}));
+
 
 /* Static images */
 app.use('/pet-pics', express.static(path.join(__dirname, '..', 'uploads', 'pet-pics')));
@@ -87,11 +73,6 @@ app.use('/api/breeds', breedsRouter);
 /* sanity */
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-/* start locally */
-if (require.main === module) {
-  const PORT = process.env.PORT || 4000;
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-}
 
 /* export serverless handler for Vercel */
 module.exports = app;
