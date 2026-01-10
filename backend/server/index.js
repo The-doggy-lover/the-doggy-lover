@@ -13,6 +13,14 @@ const breedsRouter = require('./routes/breeds');
 
 const app = express();
 
+app.use((req, res, next) => {
+  // Allow your frontend to talk to popups safely
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  next();
+});
+
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'backend is alive 🫀' });
 });
