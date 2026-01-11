@@ -7,14 +7,25 @@ const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
 
-// uploads folder
-const folderPath = path.join(__dirname, '..', '..', 'uploads', 'pet-pics');
-if (!fs.existsSync(folderPath)) fs.mkdirSync(folderPath, { recursive: true });
+const isVercel = !!process.env.VERCEL;
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, folderPath),
-  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
-});
+let folderPath = null;
+
+if (!isVercel) {
+  folderPath = path.join(__dirname, '..', '..', 'uploads', 'pet-pics');
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true });
+  }
+}
+
+
+const storage = isVercel
+  ? multer.memoryStorage()
+  : multer.diskStorage({
+      destination: (req, file, cb) => cb(null, folderPath),
+      filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
+    });
+
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 },
