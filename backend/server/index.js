@@ -86,10 +86,11 @@ app.use('/api/pets', petsRouter);
 app.use('/api/meetings', meetingsRouter);
 app.use('/api/breeds', breedsRouter);
 
-/* sanity */
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Server is running' });
+  console.log('Health check hit');
+  res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
+
 
 
 
