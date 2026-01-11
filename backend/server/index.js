@@ -86,6 +86,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
+// put this above your other routes in server/index.js
+app.get(['/', '/health', '/api/health'], (req, res) => {
+  console.log('Health check hit (url=', req.url, 'Origin=', req.headers.origin, ')');
+  return res.status(200).json({ status: 'ok', message: 'Server is running' });
+});
+
 
 /* Static images */
 app.use('/pet-pics', express.static(path.join(__dirname, '..', 'uploads', 'pet-pics')));
@@ -95,16 +101,6 @@ app.use('/api/auth', authRouter);
 app.use('/api/pets', petsRouter);
 app.use('/api/meetings', meetingsRouter);
 app.use('/api/breeds', breedsRouter);
-
-// put this above your other routes in server/index.js
-app.get(['/', '/health', '/api/health'], (req, res) => {
-  console.log('Health check hit (url=', req.url, 'Origin=', req.headers.origin, ')');
-  return res.status(200).json({ status: 'ok', message: 'Server is running' });
-});
-
-
-
-
 
 /* export serverless handler for Vercel */
 module.exports = app;
