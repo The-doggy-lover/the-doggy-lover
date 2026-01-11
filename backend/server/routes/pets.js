@@ -2,39 +2,37 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const axios = require('axios');
-const db = require('../lib/db'); // Ensure this is imported
+const path = require('path');
+const fs = require('fs');
+const db = require('../lib/db');
 
+// Explicit check for Vercel
 const isVercel = process.env.VERCEL === '1' || !!process.env.VERCEL;
 
 let upload;
 
 if (isVercel) {
-  // ✅ Vercel: NO filesystem
+  console.log("Running in Vercel environment - using Memory Storage");
   upload = multer({ storage: multer.memoryStorage() });
 } else {
-  // ✅ Local dev only
-  const path = require('path');
-  const fs = require('fs');
-
-  // Use a path relative to the process root to avoid /var/task issues
+  // Local environment logic
   const uploadDir = path.join(process.cwd(), 'uploads', 'pet-pics');
   
   try {
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
+    upload = multer({
+      storage: multer.diskStorage({
+        destination: (req, file, cb) => cb(null, uploadDir),
+        filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
+      })
+    });
   } catch (err) {
-    console.warn('Could not create upload directory, falling back to memory:', err.message);
+    // If mkdir fails for any reason, fallback to memory so the server doesn't crash
+    upload = multer({ storage: multer.memoryStorage() });
   }
-
-  upload = multer({
-    storage: multer.diskStorage({
-      destination: (req, file, cb) => cb(null, uploadDir),      
-      filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
-    })
-  });
 }
-
 
 // Helper reverse geocode (used for human-friendly location)
 async function reverseGeocode(latlngString) {
