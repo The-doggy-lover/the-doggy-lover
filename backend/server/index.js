@@ -10,7 +10,6 @@ process.on('unhandledRejection', (reason) => {
 
 // server/index.js (top portion)
 require('dotenv').config();
-require('dotenv').config({ path: '.env.local' });
 
 const express = require('express');
 
@@ -27,14 +26,15 @@ const session = require('express-session');
 
 app.use(session({
   name: 'pmp.sid',
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'dev-secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: true,
+    secure: process.env.VERCEL === '1', // true only on prod
     sameSite: 'none'
   }
 }));
+
 
 
 app.use((req, res, next) => {
@@ -93,8 +93,10 @@ app.get(['/', '/health', '/api/health'], (req, res) => {
 });
 
 
-/* Static images */
-app.use('/pet-pics', express.static(path.join(__dirname, '..', 'uploads', 'pet-pics')));
+if (process.env.VERCEL !== '1') {
+  app.use('/pet-pics', express.static(path.join(__dirname, '..', 'uploads', 'pet-pics')));
+}
+
 
 /* Mount routers */
 app.use('/api/auth', authRouter);
