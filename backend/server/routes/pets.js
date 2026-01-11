@@ -4,7 +4,8 @@ const router = express.Router();
 const multer = require('multer');
 const axios = require('axios');
 
-const isVercel = process.env.VERCEL === '1';
+const isVercel = !!process.env.VERCEL;
+
 
 let upload;
 
