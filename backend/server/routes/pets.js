@@ -1,21 +1,20 @@
 const express = require('express');
 const router = express.Router();
-
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 
-const isVercel = process.env.VERCEL === '1';
+const isVercel = !!process.env.VERCEL;
 
 let upload;
 
 if (isVercel) {
-  // ✅ Vercel: store in memory
+  // ✅ Vercel: NO filesystem
   upload = multer({ storage: multer.memoryStorage() });
 } else {
-  // ✅ Local dev: disk storage
-  const uploadDir = path.join(__dirname, '../../uploads/pet-pics');
+  // ✅ Local dev only
+  const path = require('path');
+  const fs = require('fs');
 
+  const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'pet-pics');
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
@@ -28,6 +27,7 @@ if (isVercel) {
     })
   });
 }
+
 
 // Helper reverse geocode (used for human-friendly location)
 async function reverseGeocode(latlngString) {
