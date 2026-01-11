@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const axios = require('axios');
+const db = require('../lib/db'); // Ensure this is imported
 
-
-const isVercel = !!process.env.VERCEL;
+const isVercel = process.env.VERCEL === '1' || !!process.env.VERCEL;
 
 let upload;
 
@@ -16,16 +16,21 @@ if (isVercel) {
   const path = require('path');
   const fs = require('fs');
 
-  const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'pet-pics');
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+  // Use a path relative to the process root to avoid /var/task issues
+  const uploadDir = path.join(process.cwd(), 'uploads', 'pet-pics');
+  
+  try {
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+  } catch (err) {
+    console.warn('Could not create upload directory, falling back to memory:', err.message);
   }
 
   upload = multer({
     storage: multer.diskStorage({
-      destination: uploadDir,
-      filename: (req, file, cb) =>
-        cb(null, `${Date.now()}-${file.originalname}`)
+      destination: (req, file, cb) => cb(null, uploadDir),      
+      filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
     })
   });
 }
