@@ -93,7 +93,10 @@ app.use('/api/meetings', meetingsRouter);
 app.use('/api/breeds', breedsRouter);
 
 /* sanity */
-app.get('/api/health', (req, res) => res.json({ ok: true }));
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Server is running' });
+});
+
 
 
 /* export serverless handler for Vercel */
