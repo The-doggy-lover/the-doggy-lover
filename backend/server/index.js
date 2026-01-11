@@ -86,10 +86,12 @@ app.use('/api/pets', petsRouter);
 app.use('/api/meetings', meetingsRouter);
 app.use('/api/breeds', breedsRouter);
 
-app.get('/api/health', (req, res) => {
-  console.log('Health check hit');
-  res.status(200).json({ status: 'ok', message: 'Server is running' });
+// put this above your other routes in server/index.js
+app.get(['/', '/health', '/api/health'], (req, res) => {
+  console.log('Health check hit (url=', req.url, 'Origin=', req.headers.origin, ')');
+  return res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
+
 
 
 
