@@ -15,10 +15,37 @@ const express = require('express');
 
 const path = require('path');
 
-const authRouter = require('./routes/auth');
-const petsRouter = require('./routes/pets');
-const meetingsRouter = require('./routes/meetings');
-const breedsRouter = require('./routes/breeds');
+//const authRouter = require('./routes/auth');
+//const petsRouter = require('./routes/pets');
+//const meetingsRouter = require('./routes/meetings');
+//const breedsRouter = require('./routes/breeds');
+
+let authRouter, petsRouter, meetingsRouter, breedsRouter;
+try {
+  // attempt to require but if it throws, log it and replace with a no-op router
+  authRouter = require('./routes/auth');
+} catch (e) {
+  console.error('@@@ require ./routes/auth FAILED:', e && e.stack ? e.stack : e);
+  const express = require('express'); authRouter = express.Router(); // noop router
+}
+try {
+  petsRouter = require('./routes/pets');
+} catch (e) {
+  console.error('@@@ require ./routes/pets FAILED:', e && e.stack ? e.stack : e);
+  const express = require('express'); petsRouter = express.Router();
+}
+try {
+  meetingsRouter = require('./routes/meetings');
+} catch (e) {
+  console.error('@@@ require ./routes/meetings FAILED:', e && e.stack ? e.stack : e);
+  const express = require('express'); meetingsRouter = express.Router();
+}
+try {
+  breedsRouter = require('./routes/breeds');
+} catch (e) {
+  console.error('@@@ require ./routes/breeds FAILED:', e && e.stack ? e.stack : e);
+  const express = require('express'); breedsRouter = express.Router();
+}
 
 const app = express();
 
@@ -99,10 +126,10 @@ if (process.env.VERCEL !== '1') {
 
 
 /* Mount routers */
-app.use('/api/auth', authRouter);
-app.use('/api/pets', petsRouter);
-app.use('/api/meetings', meetingsRouter);
-app.use('/api/breeds', breedsRouter);
+//app.use('/api/auth', authRouter);
+//app.use('/api/pets', petsRouter);
+//app.use('/api/meetings', meetingsRouter);
+//app.use('/api/breeds', breedsRouter);
 
 /* export serverless handler for Vercel */
 module.exports = app;
