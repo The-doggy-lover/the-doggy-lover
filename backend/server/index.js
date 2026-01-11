@@ -13,6 +13,16 @@ const breedsRouter = require('./routes/breeds');
 
 const app = express();
 
+const session = require('express-session');
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'defaultsecret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: process.env.NODE_ENV === 'production', sameSite: 'none' }
+}));
+
+
 app.use((req, res, next) => {
   // Allow your frontend to talk to popups safely
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
