@@ -1,3 +1,13 @@
+// VERY TOP of server/index.js (copy/paste)
+console.log('@@@ BOOT START - server/index.js');
+process.on('uncaughtException', (err) => {
+  console.error('@@@ UNCAUGHT EXCEPTION:', err && err.stack ? err.stack : err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('@@@ UNHANDLED REJECTION:', reason && reason.stack ? reason.stack : reason);
+});
+
+
 // server/index.js (top portion)
 require('dotenv').config();
 require('dotenv').config({ path: '.env.local' });
