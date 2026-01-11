@@ -123,15 +123,27 @@ app.get(['/', '/health', '/api/health'], (req, res) => {
 });
 
 
+// if (process.env.VERCEL !== '1') {
+//   const uploadsDir = path.join(__dirname, '..', 'uploads', 'pet-pics');
+//   if (fs.existsSync(uploadsDir)) {
+//     app.use('/pet-pics', express.static(uploadsDir));
+//   } else {
+//     console.log('@@@ uploads dir missing, skipping static serve');
+//   }
+// }
+
+const uploadsDir = '/tmp/uploads/pet-pics'; 
+
 if (process.env.VERCEL !== '1') {
-  const uploadsDir = path.join(__dirname, '..', 'uploads', 'pet-pics');
+  // Local logic remains same, but using the hardcoded string
   if (fs.existsSync(uploadsDir)) {
     app.use('/pet-pics', express.static(uploadsDir));
-  } else {
-    console.log('@@@ uploads dir missing, skipping static serve');
   }
+} else {
+  // On Vercel, we still serve it as static just in case a file exists in /tmp
+  app.use('/pet-pics', express.static(uploadsDir));
+  console.log('@@@ Vercel mode: Static serving from /tmp/uploads/pet-pics');
 }
-
 
 
 /* Mount routers */
