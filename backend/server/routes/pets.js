@@ -46,7 +46,7 @@ async function reverseGeocode(latlngString) {
   }
 }
 
-// GET /api/pets/browse
+
 router.get('/browse', (req, res) => {
   db.query(
     `SELECT id, pet_name, breed, age, gender, description, pet_photo, isOnline, location, location_coords, vaccinated, birthday, available_start_time, available_end_time
