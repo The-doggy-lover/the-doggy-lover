@@ -51,17 +51,20 @@ const app = express();
 
 const session = require('express-session');
 
-app.use(session({
+const session = require('express-session');
+const sessionMiddleware = session({
   name: 'pmp.sid',
   secret: process.env.SESSION_SECRET || 'dev-secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.VERCEL === '1', // true only on prod
+    secure: !!process.env.VERCEL, // only true when Vercel sets env
     sameSite: 'none'
   }
-}));
+});
 
+// use session only after health route
+// app.use(sessionMiddleware);   <-- comment this out for now
 
 
 app.use((req, res, next) => {
@@ -121,8 +124,14 @@ app.get(['/', '/health', '/api/health'], (req, res) => {
 
 
 if (process.env.VERCEL !== '1') {
-  app.use('/pet-pics', express.static(path.join(__dirname, '..', 'uploads', 'pet-pics')));
+  const uploadsDir = path.join(__dirname, '..', 'uploads', 'pet-pics');
+  if (fs.existsSync(uploadsDir)) {
+    app.use('/pet-pics', express.static(uploadsDir));
+  } else {
+    console.log('@@@ uploads dir missing, skipping static serve');
+  }
 }
+
 
 
 /* Mount routers */
