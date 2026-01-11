@@ -29,8 +29,6 @@ if (isVercel) {
   });
 }
 
-
-
 // Helper reverse geocode (used for human-friendly location)
 async function reverseGeocode(latlngString) {
   if (!latlngString) return null;
