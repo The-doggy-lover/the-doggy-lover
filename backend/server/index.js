@@ -16,10 +16,14 @@ const app = express();
 const session = require('express-session');
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'defaultsecret',
+  name: 'pmp.sid',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: process.env.NODE_ENV === 'production', sameSite: 'none' }
+  cookie: {
+    secure: true,
+    sameSite: 'none'
+  }
 }));
 
 
