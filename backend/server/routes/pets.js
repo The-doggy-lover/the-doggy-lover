@@ -1,42 +1,34 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../lib/db');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const axios = require('axios');
 
-// 👇 VERY IMPORTANT: detect Vercel FIRST
 const isVercel = process.env.VERCEL === '1';
 
-// Only define uploadDir for local
-let uploadDir = null;
+const multer = require('multer');
+const axios = require('axios');
 
-if (!isVercel) {
-  uploadDir = path.join(__dirname, '../../uploads/pet-pics');
+let upload = null;
+
+if (isVercel) {
+  upload = multer({ storage: multer.memoryStorage() });
+} else {
+  const path = require('path');
+  const fs = require('fs');
+
+  const uploadDir = path.join(__dirname, '../../uploads/pet-pics');
 
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
-}
 
-const storage = isVercel
-  ? multer.memoryStorage()
-  : multer.diskStorage({
-      destination: (req, file, cb) => cb(null, uploadDir),
+  upload = multer({
+    storage: multer.diskStorage({
+      destination: uploadDir,
       filename: (req, file, cb) =>
         cb(null, `${Date.now()}-${file.originalname}`)
-    });
+    })
+  });
+}
 
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/jpg'];
-    cb(null, allowed.includes(file.mimetype));
-  }
-});
 
 // Helper reverse geocode (used for human-friendly location)
 async function reverseGeocode(latlngString) {
