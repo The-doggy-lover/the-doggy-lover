@@ -7,16 +7,20 @@ const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
 
-const isVercel = !!process.env.VERCEL;
+
+const uploadDir = path.join(__dirname, '../../uploads/pet-pics');
+
 
 let folderPath = null;
 
+const isVercel = process.env.VERCEL === '1';
+
 if (!isVercel) {
-  folderPath = path.join(__dirname, '..', '..', 'uploads', 'pet-pics');
-  if (!fs.existsSync(folderPath)) {
-    fs.mkdirSync(folderPath, { recursive: true });
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
   }
 }
+
 
 
 const storage = isVercel
