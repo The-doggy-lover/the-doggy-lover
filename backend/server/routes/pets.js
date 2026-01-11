@@ -1,28 +1,33 @@
-// server/routes/pets.js
 const express = require('express');
 const router = express.Router();
-const db = require('../lib/db');
+
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const axios = require('axios');
 
-// uploads folder
-const folderPath = path.join(__dirname, '..', '..', 'uploads', 'pet-pics');
-if (!fs.existsSync(folderPath)) fs.mkdirSync(folderPath, { recursive: true });
+const isVercel = process.env.VERCEL === '1';
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, folderPath),
-  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
-});
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/jpg'];
-    cb(null, allowed.includes(file.mimetype));
+let upload;
+
+if (isVercel) {
+  // ✅ Vercel: store in memory
+  upload = multer({ storage: multer.memoryStorage() });
+} else {
+  // ✅ Local dev: disk storage
+  const uploadDir = path.join(__dirname, '../../uploads/pet-pics');
+
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
   }
-});
+
+  upload = multer({
+    storage: multer.diskStorage({
+      destination: uploadDir,
+      filename: (req, file, cb) =>
+        cb(null, `${Date.now()}-${file.originalname}`)
+    })
+  });
+}
 
 // Helper reverse geocode (used for human-friendly location)
 async function reverseGeocode(latlngString) {
@@ -41,7 +46,7 @@ async function reverseGeocode(latlngString) {
   }
 }
 
-// GET /api/pets/browse
+
 router.get('/browse', (req, res) => {
   db.query(
     `SELECT id, pet_name, breed, age, gender, description, pet_photo, isOnline, location, location_coords, vaccinated, birthday, available_start_time, available_end_time
@@ -122,35 +127,76 @@ router.post('/generate-description', async (req, res) => {
 router.post('/add-pet', upload.single('photo'), async (req, res) => {
   try {
     const userId = req.session.user?.id;
-    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    if (!userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
 
     let { pet_name, breed, custom_breed, age, gender, description, isOnline } = req.body;
     breed = (custom_breed?.trim() || breed || '').trim();
-    if (!pet_name || !breed || !age || !gender || !req.file) {
-      return res.status(400).json({ error: 'Missing required pet data or photo' });
+
+    if (!pet_name || !breed || !age || !gender) {
+      return res.status(400).json({ error: 'Missing required pet data' });
     }
 
-    const [[userRow]] = await db.query('SELECT location_coords FROM users WHERE id = ?', [userId]);
-    const rawCoords = userRow?.location_coords || null;
-    const humanLocation = rawCoords ? await reverseGeocode(rawCoords) : '';
+    // 🧠 Handle photo differently for Vercel vs local
+    let petPhoto = null;
 
+    if (isVercel) {
+      // Vercel: multer.memoryStorage → file exists in memory
+      if (!req.file) {
+        return res.status(400).json({ error: 'Photo is required' });
+      }
+
+      // 🚨 For now we do NOT store the image on Vercel FS
+      // Later you can upload req.file.buffer to Cloudinary/S3
+      petPhoto = null;
+    } else {
+      // Local: disk storage
+      if (!req.file || !req.file.filename) {
+        return res.status(400).json({ error: 'Photo is required' });
+      }
+      petPhoto = req.file.filename;
+    }
+
+    const [[userRow]] = await db.query(
+      'SELECT location_coords FROM users WHERE id = ?',
+      [userId]
+    );
+
+    const rawCoords = userRow?.location_coords || null;
+    const humanLocation = rawCoords
+      ? await reverseGeocode(rawCoords)
+      : '';
+
+    // Save breed if custom
     await db.query('INSERT IGNORE INTO breeds (name) VALUES (?)', [breed]);
+
     await db.execute(
       `INSERT INTO pets
-         (user_id, pet_name, breed, age, gender, description, pet_photo, isOnline, location, location_coords)
+        (user_id, pet_name, breed, age, gender, description, pet_photo, isOnline, location, location_coords)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        userId, pet_name, breed, age, gender, description || '',
-        req.file.filename, isOnline ? 1 : 0, humanLocation, rawCoords
+        userId,
+        pet_name,
+        breed,
+        age,
+        gender,
+        description || '',
+        petPhoto,
+        isOnline ? 1 : 0,
+        humanLocation,
+        rawCoords
       ]
     );
 
     res.status(201).json({ message: 'Pet added successfully' });
+
   } catch (err) {
     console.error('Error in POST /add-pet:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 // Favourites endpoints (user favourites)
 router.get('/users/:id/favourites', async (req, res) => {
