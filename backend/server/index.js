@@ -123,34 +123,30 @@ app.get(['/', '/health', '/api/health'], (req, res) => {
 });
 
 
-// if (process.env.VERCEL !== '1') {
-//   const uploadsDir = path.join(__dirname, '..', 'uploads', 'pet-pics');
-//   if (fs.existsSync(uploadsDir)) {
-//     app.use('/pet-pics', express.static(uploadsDir));
-//   } else {
-//     console.log('@@@ uploads dir missing, skipping static serve');
-//   }
-// }
-
-const uploadsDir = '/tmp/uploads/pet-pics'; 
+const fs = require('fs');
+const path = require('path');
 
 if (process.env.VERCEL !== '1') {
-  // Local logic remains same, but using the hardcoded string
-  if (fs.existsSync(uploadsDir)) {
-    app.use('/pet-pics', express.static(uploadsDir));
+  // 🖥️ Local dev ONLY
+  const uploadsDir = path.join(__dirname, '..', 'uploads', 'pet-pics');
+
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
   }
-} else {
-  // On Vercel, we still serve it as static just in case a file exists in /tmp
+
   app.use('/pet-pics', express.static(uploadsDir));
-  console.log('@@@ Vercel mode: Static serving from /tmp/uploads/pet-pics');
+  console.log('@@@ Local mode: serving pet-pics from', uploadsDir);
+} else {
+  // ☁️ Vercel: do NOTHING
+  console.log('@@@ Vercel mode: pet-pics disabled (use cloud storage)');
 }
 
 
 /* Mount routers */
-//app.use('/api/auth', authRouter);
-//app.use('/api/pets', petsRouter);
-//app.use('/api/meetings', meetingsRouter);
-//app.use('/api/breeds', breedsRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/pets', petsRouter);
+app.use('/api/meetings', meetingsRouter);
+app.use('/api/breeds', breedsRouter);
 
 /* export serverless handler for Vercel */
 module.exports = app;
