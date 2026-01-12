@@ -4,21 +4,23 @@ const multer = require('multer');
 const axios = require('axios');
 
 
-const isVercel = !!process.env.VERCEL;
+const isVercel = process.env.VERCEL === '1';
 
 let upload;
 
 if (isVercel) {
-  // ✅ Vercel: NO filesystem
-  upload = multer({ storage: multer.memoryStorage() });
+  // ☁️ Vercel: NO filesystem, NO mkdir
+  upload = multer({
+    storage: multer.memoryStorage()
+  });
+
+  console.log('@@@ Vercel mode: using memory storage for uploads');
 } else {
-  // ✅ Local dev only
+  // 🖥️ Local dev ONLY
   const path = require('path');
   const fs = require('fs');
 
-  // const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'pet-pics');
-
-  const uploadDir = '/tmp/uploads/pet-pics';  
+  const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'pet-pics');
 
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -27,11 +29,15 @@ if (isVercel) {
   upload = multer({
     storage: multer.diskStorage({
       destination: uploadDir,
-      filename: (req, file, cb) =>
-        cb(null, `${Date.now()}-${file.originalname}`)
+      filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`);
+      }
     })
   });
+
+  console.log('@@@ Local mode: saving uploads to', uploadDir);
 }
+
 
 
 // Helper reverse geocode (used for human-friendly location)
