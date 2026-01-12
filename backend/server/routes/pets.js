@@ -1,10 +1,13 @@
+console.log('@@@ process.env.VERCEL =', process.env.VERCEL);
+console.log('@@@ isVercel =', isVercel);
+
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const axios = require('axios');
 
 
-const isVercel = process.env.VERCEL === '1';
+const isVercel = !!process.env.VERCEL;
 
 let upload;
 
