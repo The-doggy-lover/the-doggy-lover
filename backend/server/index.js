@@ -51,7 +51,6 @@ const app = express();
 
 const session = require('express-session');
 
-const session = require('express-session');
 const sessionMiddleware = session({
   name: 'pmp.sid',
   secret: process.env.SESSION_SECRET || 'dev-secret',
