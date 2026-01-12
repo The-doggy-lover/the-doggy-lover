@@ -1,3 +1,4 @@
+
 // VERY TOP of server/index.js (copy/paste)
 console.log('@@@ BOOT START - server/index.js');
 process.on('uncaughtException', (err) => {
@@ -124,7 +125,10 @@ app.get(['/', '/health', '/api/health'], (req, res) => {
 
 const fs = require('fs');
 
-if (process.env.VERCEL !== '1') {
+const isVercel = !!process.env.VERCEL;
+
+
+if (!isVercel) {
   // 🖥️ Local dev ONLY
   const uploadsDir = path.join(__dirname, '..', 'uploads', 'pet-pics');
 
