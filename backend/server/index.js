@@ -1,12 +1,12 @@
 
 // VERY TOP of server/index.js (copy/paste)
-console.log('@@@ BOOT START - server/index.js');
-process.on('uncaughtException', (err) => {
-  console.error('@@@ UNCAUGHT EXCEPTION:', err && err.stack ? err.stack : err);
-});
-process.on('unhandledRejection', (reason) => {
-  console.error('@@@ UNHANDLED REJECTION:', reason && reason.stack ? reason.stack : reason);
-});
+// console.log('@@@ BOOT START - server/index.js');
+// process.on('uncaughtException', (err) => {
+//   console.error('@@@ UNCAUGHT EXCEPTION:', err && err.stack ? err.stack : err);
+// });
+// process.on('unhandledRejection', (reason) => {
+//   console.error('@@@ UNHANDLED REJECTION:', reason && reason.stack ? reason.stack : reason);
+// });
 
 
 // server/index.js (top portion)
@@ -22,6 +22,7 @@ const path = require('path');
 //const breedsRouter = require('./routes/breeds');
 
 let authRouter, petsRouter, meetingsRouter, breedsRouter;
+
 try {
   // attempt to require but if it throws, log it and replace with a no-op router
   authRouter = require('./routes/auth');
@@ -50,38 +51,41 @@ try {
 
 const app = express();
 
-const session = require('express-session');
+// const session = require('express-session');
 
-const sessionMiddleware = session({
-  name: 'pmp.sid',
-  secret: process.env.SESSION_SECRET || 'dev-secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: !!process.env.VERCEL, // only true when Vercel sets env
-    sameSite: 'none'
-  }
-});
+// const sessionMiddleware = session({
+//   name: 'pmp.sid',
+//   secret: process.env.SESSION_SECRET || 'dev-secret',
+//   resave: false,
+//   saveUninitialized: false,
+//   cookie: {
+//     secure: !!process.env.VERCEL, // only true when Vercel sets env
+//     sameSite: 'none'
+//   }
+// });
 
 // use session only after health route
 // app.use(sessionMiddleware);   <-- comment this out for now
 
 
-app.use((req, res, next) => {
-  // Allow your frontend to talk to popups safely
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-  next();
-});
+// app.use((req, res, next) => {
+//   // Allow your frontend to talk to popups safely
+//   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+//   res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+//   next();
+// });
 
 /**
  * Allowed origins: only your front-end domains.
  * Use exact origins (don't use "*") because you need cookies/credentials.
  */
+// const ALLOWED_ORIGINS = [
+//   'http://localhost:8080',
+//   'https://petmypet.in',
+//   'https://www.petmypet.in'
+// ];
 const ALLOWED_ORIGINS = [
-  'http://localhost:8080',
-  'https://petmypet.in',
-  'https://www.petmypet.in'
+  '*'
 ];
 const allowedOrigin = process.env.VITE_FRONTEND_URL || process.env.FRONTEND_URL || 'https://www.petmypet.in';
 
@@ -123,32 +127,32 @@ app.get(['/', '/health', '/api/health'], (req, res) => {
 });
 
 
-const fs = require('fs');
+// const fs = require('fs');
 
-const isVercel = !!process.env.VERCEL;
+// const isVercel = !!process.env.VERCEL;
 
 
-if (!isVercel) {
-  // 🖥️ Local dev ONLY
-  // const uploadsDir = path.join(__dirname, '..', 'uploads', 'pet-pics');
+// if (!isVercel) {
+//   // 🖥️ Local dev ONLY
+//   // const uploadsDir = path.join(__dirname, '..', 'uploads', 'pet-pics');
 
-  // if (!fs.existsSync(uploadsDir)) {
-  //   fs.mkdirSync(uploadsDir, { recursive: true });
-  // }
+//   // if (!fs.existsSync(uploadsDir)) {
+//   //   fs.mkdirSync(uploadsDir, { recursive: true });
+//   // }
 
-  // app.use('/pet-pics', express.static(uploadsDir));
-  // console.log('@@@ Local mode: serving pet-pics from', uploadsDir);
-} else {
-  // ☁️ Vercel: do NOTHING
-  console.log('@@@ Vercel mode: pet-pics disabled (use cloud storage)');
-}
+//   // app.use('/pet-pics', express.static(uploadsDir));
+//   // console.log('@@@ Local mode: serving pet-pics from', uploadsDir);
+// } else {
+//   // ☁️ Vercel: do NOTHING
+//   console.log('@@@ Vercel mode: pet-pics disabled (use cloud storage)');
+// }
 
 
 /* Mount routers */
-app.use('/api/auth', authRouter);
-app.use('/api/pets', petsRouter);
-app.use('/api/meetings', meetingsRouter);
-app.use('/api/breeds', breedsRouter);
+// app.use('/api/auth', authRouter);
+// app.use('/api/pets', petsRouter);
+// app.use('/api/meetings', meetingsRouter);
+// app.use('/api/breeds', breedsRouter);
 
 /* export serverless handler for Vercel */
 module.exports = app;
