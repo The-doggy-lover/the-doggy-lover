@@ -21,33 +21,33 @@ const path = require('path');
 //const meetingsRouter = require('./routes/meetings');
 //const breedsRouter = require('./routes/breeds');
 
-let authRouter, petsRouter, meetingsRouter, breedsRouter;
+// let authRouter, petsRouter, meetingsRouter, breedsRouter;
 
-try {
-  // attempt to require but if it throws, log it and replace with a no-op router
-  authRouter = require('./routes/auth');
-} catch (e) {
-  console.error('@@@ require ./routes/auth FAILED:', e && e.stack ? e.stack : e);
-  const express = require('express'); authRouter = express.Router(); // noop router
-}
 // try {
-//   petsRouter = require('./routes/pets');
+//   // attempt to require but if it throws, log it and replace with a no-op router
+//   authRouter = require('./routes/auth');
 // } catch (e) {
-//   console.error('@@@ require ./routes/pets FAILED:', e && e.stack ? e.stack : e);
-//   const express = require('express'); petsRouter = express.Router();
+//   console.error('@@@ require ./routes/auth FAILED:', e && e.stack ? e.stack : e);
+//   const express = require('express'); authRouter = express.Router(); // noop router
 // }
-try {
-  meetingsRouter = require('./routes/meetings');
-} catch (e) {
-  console.error('@@@ require ./routes/meetings FAILED:', e && e.stack ? e.stack : e);
-  const express = require('express'); meetingsRouter = express.Router();
-}
-try {
-  breedsRouter = require('./routes/breeds');
-} catch (e) {
-  console.error('@@@ require ./routes/breeds FAILED:', e && e.stack ? e.stack : e);
-  const express = require('express'); breedsRouter = express.Router();
-}
+// // try {
+// //   petsRouter = require('./routes/pets');
+// // } catch (e) {
+// //   console.error('@@@ require ./routes/pets FAILED:', e && e.stack ? e.stack : e);
+// //   const express = require('express'); petsRouter = express.Router();
+// // }
+// try {
+//   meetingsRouter = require('./routes/meetings');
+// } catch (e) {
+//   console.error('@@@ require ./routes/meetings FAILED:', e && e.stack ? e.stack : e);
+//   const express = require('express'); meetingsRouter = express.Router();
+// }
+// try {
+//   breedsRouter = require('./routes/breeds');
+// } catch (e) {
+//   console.error('@@@ require ./routes/breeds FAILED:', e && e.stack ? e.stack : e);
+//   const express = require('express'); breedsRouter = express.Router();
+// }
 
 const app = express();
 
@@ -117,7 +117,7 @@ app.use((req, res, next) => {
 
 /* Body parsing */
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.urlencoded({ extended: true }));
 
 
 // put this above your other routes in server/index.js
