@@ -12,35 +12,35 @@ const axios = require('axios');
 
 let upload;
 
-if (isVercel) {
-  // ☁️ Vercel: NO filesystem, NO mkdir
-  upload = multer({
-    storage: multer.memoryStorage()
-  });
+// if (isVercel) {
+//   // ☁️ Vercel: NO filesystem, NO mkdir
+//   upload = multer({
+//     storage: multer.memoryStorage()
+//   });
 
-  console.log('@@@ Vercel mode: using memory storage for uploads');
-} else {
-  // 🖥️ Local dev ONLY
-  const path = require('path');
-  const fs = require('fs');
+//   console.log('@@@ Vercel mode: using memory storage for uploads');
+// } else {
+//   // 🖥️ Local dev ONLY
+//   const path = require('path');
+//   const fs = require('fs');
 
-  const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'pet-pics');
+//   const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'pet-pics');
 
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
+//   if (!fs.existsSync(uploadDir)) {
+//     fs.mkdirSync(uploadDir, { recursive: true });
+//   }
 
-  upload = multer({
-    storage: multer.diskStorage({
-      destination: uploadDir,
-      filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-      }
-    })
-  });
+//   upload = multer({
+//     storage: multer.diskStorage({
+//       destination: uploadDir,
+//       filename: (req, file, cb) => {
+//         cb(null, `${Date.now()}-${file.originalname}`);
+//       }
+//     })
+//   });
 
-  console.log('@@@ Local mode: saving uploads to', uploadDir);
-}
+//   console.log('@@@ Local mode: saving uploads to', uploadDir);
+// }
 
 
 
