@@ -1,7 +1,7 @@
-const isVercel = !!process.env.VERCEL;
+// const isVercel = !!process.env.VERCEL;
+const isVercel = true
 
-
-console.log('@@@ process.env.VERCEL =', process.env.VERCEL);
+// console.log('@@@ process.env.VERCEL =', process.env.VERCEL);
 console.log('@@@ isVercel =', isVercel);
 
 const express = require('express');

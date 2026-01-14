@@ -30,12 +30,12 @@ try {
   console.error('@@@ require ./routes/auth FAILED:', e && e.stack ? e.stack : e);
   const express = require('express'); authRouter = express.Router(); // noop router
 }
-try {
-  petsRouter = require('./routes/pets');
-} catch (e) {
-  console.error('@@@ require ./routes/pets FAILED:', e && e.stack ? e.stack : e);
-  const express = require('express'); petsRouter = express.Router();
-}
+// try {
+//   petsRouter = require('./routes/pets');
+// } catch (e) {
+//   console.error('@@@ require ./routes/pets FAILED:', e && e.stack ? e.stack : e);
+//   const express = require('express'); petsRouter = express.Router();
+// }
 try {
   meetingsRouter = require('./routes/meetings');
 } catch (e) {
