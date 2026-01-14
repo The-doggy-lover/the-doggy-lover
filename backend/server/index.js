@@ -130,14 +130,14 @@ const isVercel = !!process.env.VERCEL;
 
 if (!isVercel) {
   // 🖥️ Local dev ONLY
-  const uploadsDir = path.join(__dirname, '..', 'uploads', 'pet-pics');
+  // const uploadsDir = path.join(__dirname, '..', 'uploads', 'pet-pics');
 
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-  }
+  // if (!fs.existsSync(uploadsDir)) {
+  //   fs.mkdirSync(uploadsDir, { recursive: true });
+  // }
 
-  app.use('/pet-pics', express.static(uploadsDir));
-  console.log('@@@ Local mode: serving pet-pics from', uploadsDir);
+  // app.use('/pet-pics', express.static(uploadsDir));
+  // console.log('@@@ Local mode: serving pet-pics from', uploadsDir);
 } else {
   // ☁️ Vercel: do NOTHING
   console.log('@@@ Vercel mode: pet-pics disabled (use cloud storage)');
