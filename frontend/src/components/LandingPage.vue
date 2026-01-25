@@ -37,7 +37,7 @@
 const backendUrl = process.env.VUE_APP_API_URL;
 
 export default {
-  name: 'PetLoginPage',
+  name: 'LandingPage',
   mounted() {
     if (!document.querySelector('script[src="https://accounts.google.com/gsi/client"]')) {
       const script = document.createElement('script')
