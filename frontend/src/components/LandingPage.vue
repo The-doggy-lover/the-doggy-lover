@@ -73,26 +73,35 @@ export default {
     async handleCredentialResponse(response) {
       console.log('🟢 Google callback fired');
 
-      const { credential } = response;
-      const payload = JSON.parse(atob(credential.split('.')[1]));
-      const email = payload.email;
-      const fullname = payload.name;
+      try {
+        const { credential } = response;
+        const payload = JSON.parse(atob(credential.split('.')[1]));
+        const email = payload.email;
+        const fullname = payload.name;
 
-      const res = await fetch(`${backendUrl}/api/auth/google-login`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, fullname })
-      });
+        console.log('📤 Sending to backend:', email, fullname);
 
-      const data = await res.json();
-      console.log('🟢 Backend response:', data);
+        const res = await fetch(`${backendUrl}/api/auth/google-login`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, fullname })
+        });
 
-      console.log('🟢 Emitting user-logged-in NOW');
-      this.$emit('user-logged-in', {
-        ...data.user,
-        isNew: data.isNew
-      });
+        console.log('📥 Raw response:', res);
+
+        const data = await res.json();
+        console.log('🟢 Backend response:', data);
+
+        console.log('🟢 Emitting user-logged-in NOW');
+        this.$emit('user-logged-in', {
+          ...data.user,
+          isNew: data.isNew
+        });
+
+      } catch (err) {
+        console.error('💥 Google login FAILED:', err);
+      }
     },
     handleSignUp() {
       this.$emit('change-page', 'SignupPage')

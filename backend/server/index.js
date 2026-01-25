@@ -67,13 +67,6 @@ const app = express();
 // use session only after health route
 // app.use(sessionMiddleware);   <-- comment this out for now
 
-app.use((req, res, next) => {
-  // Allow your frontend to talk to popups safely
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-  next();
-});
-
 /**
  * Allowed origins: only your front-end domains.
  * Use exact origins (don't use "*") because you need cookies/credentials.
@@ -83,10 +76,24 @@ app.use((req, res, next) => {
 //   'https://petmypet.in',
 //   'https://www.petmypet.in'
 // ];
-const ALLOWED_ORIGINS = [
-  '*'
-];
-const allowedOrigin = process.env.VITE_FRONTEND_URL || process.env.FRONTEND_URL || 'https://www.petmypet.in';
+
+import cors from 'cors';
+
+const cors = require('cors');
+
+app.use(cors({
+  origin: [
+    'http://localhost:8080',
+    'http://localhost:3000',
+    'https://petmypet.app' // ← your real Vercel domain
+  ],
+  credentials: true
+}));
+
+app.options('*', cors());
+
+app.options('*', cors());
+
 
 /* Logging (helpful for Vercel) */
 app.use((req, res, next) => {
@@ -94,25 +101,6 @@ app.use((req, res, next) => {
   next();
 });
 
-/* Dynamic CORS middleware that only allows configured origins and responds to OPTIONS */
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin && (ALLOWED_ORIGINS.includes(origin) || origin === allowedOrigin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
-
-  } else {
-    // no Access-Control-Allow-Origin header set if not allowed
-  }
-
-  // handle preflight
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-  next();
-});
 
 /* Body parsing */
 app.use(express.json());
