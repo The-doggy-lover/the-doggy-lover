@@ -71,23 +71,28 @@ export default {
       }
     },
     async handleCredentialResponse(response) {
-      const { credential } = response
-      const payload = JSON.parse(atob(credential.split('.')[1]))
-      const email = payload.email
-      const fullname = payload.name
+      console.log('🟢 Google callback fired');
+
+      const { credential } = response;
+      const payload = JSON.parse(atob(credential.split('.')[1]));
+      const email = payload.email;
+      const fullname = payload.name;
 
       const res = await fetch(`${backendUrl}/api/auth/google-login`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, fullname })
-      })
-      const data = await res.json()
-        this.$emit('user-logged-in', {
+      });
+
+      const data = await res.json();
+      console.log('🟢 Backend response:', data);
+
+      console.log('🟢 Emitting user-logged-in NOW');
+      this.$emit('user-logged-in', {
         ...data.user,
         isNew: data.isNew
       });
-
     },
     handleSignUp() {
       this.$emit('change-page', 'SignupPage')
