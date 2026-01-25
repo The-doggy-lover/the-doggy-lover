@@ -157,9 +157,17 @@ export default {
     viewPetProfile(pet) {
       this.changePage('PetDescriptionPage', { pet });
     },
-    handleGoogleSuccess(response) {
-      console.log('✅ Google login response:', response);
-      this.onLogin(response);
+    handleGoogleSuccess(payload) {
+      console.log('✅ Google login response:', payload);
+
+      this.loggedInUser = payload;
+      this.currentUser = payload;
+
+      if (payload.isNew || !payload.user_type) {
+        this.changePage('SignupPage');
+      } else {
+        this.changePage('DashboardPage');
+      }
     },
     onLogin(payload) {
       console.log('✅ onLogin payload:', payload);

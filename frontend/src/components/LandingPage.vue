@@ -83,8 +83,11 @@ export default {
         body: JSON.stringify({ email, fullname })
       })
       const data = await res.json()
-      this.$emit('user-logged-in', data.user)
-      this.$emit('change-page', data.isNew ? 'SignupPage' : 'DashboardPage')
+        this.$emit('user-logged-in', {
+        ...data.user,
+        isNew: data.isNew
+      });
+
     },
     handleSignUp() {
       this.$emit('change-page', 'SignupPage')

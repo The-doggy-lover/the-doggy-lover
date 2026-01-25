@@ -67,13 +67,12 @@ const app = express();
 // use session only after health route
 // app.use(sessionMiddleware);   <-- comment this out for now
 
-
-// app.use((req, res, next) => {
-//   // Allow your frontend to talk to popups safely
-//   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-//   res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-//   next();
-// });
+app.use((req, res, next) => {
+  // Allow your frontend to talk to popups safely
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  next();
+});
 
 /**
  * Allowed origins: only your front-end domains.
