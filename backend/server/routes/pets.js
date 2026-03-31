@@ -1,16 +1,17 @@
-// const isVercel = !!process.env.VERCEL;
 const isVercel = true
-
-// console.log('@@@ process.env.VERCEL =', process.env.VERCEL);
-console.log('@@@ isVercel =', isVercel);
-
+const db = require('../lib/db');
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const axios = require('axios');
+const { uploadToCloudinary } = require('../utils/utils');
+
+const upload = multer({
+  storage: multer.memoryStorage()
+});
 
 
-let upload;
+// let upload;
 
 // if (isVercel) {
 //   // ☁️ Vercel: NO filesystem, NO mkdir
@@ -153,25 +154,35 @@ router.post('/add-pet', upload.single('photo'), async (req, res) => {
       return res.status(400).json({ error: 'Missing required pet data' });
     }
 
-    // 🧠 Handle photo differently for Vercel vs local
-    let petPhoto = null;
-
-    if (isVercel) {
-      // Vercel: multer.memoryStorage → file exists in memory
-      if (!req.file) {
-        return res.status(400).json({ error: 'Photo is required' });
-      }
-
-      // 🚨 For now we do NOT store the image on Vercel FS
-      // Later you can upload req.file.buffer to Cloudinary/S3
-      petPhoto = null;
-    } else {
-      // Local: disk storage
-      if (!req.file || !req.file.filename) {
-        return res.status(400).json({ error: 'Photo is required' });
-      }
-      petPhoto = req.file.filename;
+    if (!req.file) {
+      return res.status(400).json({ error: 'Photo is required' });
     }
+
+    // 🧠 Handle photo differently for Vercel vs local
+    let petPhoto;
+    try {
+      petPhoto = await uploadToCloudinary(req.file.buffer);
+    } catch (err) {
+      console.error('Cloudinary upload failed:', err);
+      return res.status(500).json({ error: 'Image upload failed' });
+    }
+
+    // if (isVercel) {
+    //   // Vercel: multer.memoryStorage → file exists in memory
+    //   if (!req.file) {
+    //     return res.status(400).json({ error: 'Photo is required' });
+    //   }
+
+    //   // 🚨 For now we do NOT store the image on Vercel FS
+    //   // Later you can upload req.file.buffer to Cloudinary/S3
+    //   petPhoto = null;
+    // } else {
+    //   // Local: disk storage
+    //   if (!req.file || !req.file.filename) {
+    //     return res.status(400).json({ error: 'Photo is required' });
+    //   }
+    //   petPhoto = req.file.filename;
+    // }
 
     const [[userRow]] = await db.query(
       'SELECT location_coords FROM users WHERE id = ?',
