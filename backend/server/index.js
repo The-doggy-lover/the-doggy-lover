@@ -14,12 +14,12 @@ require('dotenv').config();
 
 const express = require('express');
 
-const path = require('path');
+// const path = require('path');
 
-//const authRouter = require('./routes/auth');
-//const petsRouter = require('./routes/pets');
-//const meetingsRouter = require('./routes/meetings');
-//const breedsRouter = require('./routes/breeds');
+// const authRouter = require('./routes/auth');
+// const petsRouter = require('./routes/pets');
+// const meetingsRouter = require('./routes/meetings');
+// const breedsRouter = require('./routes/breeds');
 
 // let authRouter, petsRouter, meetingsRouter, breedsRouter;
 
@@ -77,7 +77,7 @@ const app = express();
 //   'https://www.petmypet.in'
 // ];
 
-import cors from 'cors';
+// import cors from 'cors';
 
 const cors = require('cors');
 
@@ -90,9 +90,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.options('*', cors());
-
-app.options('*', cors());
+app.options(/.*/, cors());
 
 
 /* Logging (helpful for Vercel) */
