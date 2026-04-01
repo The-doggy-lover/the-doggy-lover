@@ -26,7 +26,7 @@ app.use(cors({
   origin: [
     'http://localhost:8080',
     'http://localhost:3000',
-    'https://petmypet.app'
+    'https://petmypet.in'
   ],
   credentials: true
 }));
