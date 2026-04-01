@@ -11,6 +11,17 @@ const breedsRouter = require('./routes/breeds');
 
 const app = express();
 
+app.use(cors({
+  origin: [
+    'http://localhost:8080',
+    'http://localhost:3000',
+    'https://petmypet.in'
+  ],
+  credentials: true
+}));
+
+app.options('*', cors());
+
 app.use(session({
   name: 'pmp.sid',
   secret: process.env.SESSION_SECRET || 'dev-secret',
@@ -21,17 +32,6 @@ app.use(session({
     sameSite: process.env.VERCEL ? 'none' : 'lax'
   }
 }));
-
-app.use(cors({
-  origin: [
-    'http://localhost:8080',
-    'http://localhost:3000',
-    'https://petmypet.in'
-  ],
-  credentials: true
-}));
-
-app.options(/.*/, cors());
 
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
