@@ -11,6 +11,11 @@ const breedsRouter = require('./routes/breeds');
 
 const app = express();
 
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  next();
+});
+
 app.set('trust proxy', 1);
 
 app.use(cors({
