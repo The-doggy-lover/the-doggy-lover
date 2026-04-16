@@ -102,7 +102,12 @@
       </div>
 
       <!-- Submit -->
-      <button class="submit-button" type="submit" :disabled="isLoading">
+      <button 
+        class="submit-button" 
+        type="button"
+        :disabled="isLoading"
+        @click="addPet"
+      >
         <span v-if="isLoading">Adding...</span>
         <span v-else>Add Pet</span>
       </button>

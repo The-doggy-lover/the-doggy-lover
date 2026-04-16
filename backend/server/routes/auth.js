@@ -18,11 +18,14 @@ function getUserTokens(req) {
 // POST /api/auth/google-login
 // Frontend does Google client-side sign-in and sends email+fullname to this endpoint
 router.post('/google-login', async (req, res) => {
+  console.log("google-login route hit");
   const { email, fullname } = req.body;
 
   if (!email || !fullname) {
     return res.status(400).json({ success: false, message: 'Missing email or fullname' });
   }
+
+  console.log(email);
 
   try {
     const [rows] = await db.query(
@@ -33,22 +36,51 @@ router.post('/google-login', async (req, res) => {
     if (rows.length > 0) {
       const user = rows[0];
       req.session.user = user;
-      return res.json({
-        success: true,
-        isNew: false,
-        user
+    
+      console.log("Session BEFORE save:", req.session);
+      console.log("[AUTH DEBUG] /google-login existing user pre-save sessionID:", req.sessionID);
+
+      return req.session.save(() => {
+
+        console.log("Session AFTER save:", req.session);
+        console.log("[AUTH DEBUG] /google-login existing user post-save sessionID:", req.sessionID);
+        console.log("[AUTH DEBUG] /google-login existing user post-save req.session.user:", req.session?.user);
+
+        res.json({
+          success: true,
+          isNew: false,
+          user
+        });
       });
     }
 
-    // If no user exists
-    return res.json({
-      success: true,
-      isNew: true,
-      user: {
-        email,
-        fullname,
-        user_type: null
-      }
+    // 🆕 NEW USER → INSERT INTO DB
+    const [result] = await db.query(
+      'INSERT INTO users (email, fullname) VALUES (?, ?)',
+      [email, fullname]
+    );
+
+    console.log("INSERT RESULT:", result);    
+
+    const newUser = {
+      id: result.insertId,
+      email,
+      fullname,
+      user_type: null
+    };
+
+    req.session.user = newUser;
+
+
+
+    return req.session.save(() => {
+      console.log("[AUTH DEBUG] /google-login new user post-save sessionID:", req.sessionID);
+      console.log("[AUTH DEBUG] /google-login new user post-save req.session.user:", req.session?.user);
+      res.json({
+        success: true,
+        isNew: true,
+        user: newUser
+      });
     });
 
   } catch (err) {
@@ -168,8 +200,21 @@ router.get('/check-auth', (req, res) => {
 
 // GET /api/auth/me
 router.get('/me', (req, res) => {
-  if (!req.session?.user) return res.status(401).json({ error: 'Not authenticated' });
-  res.json({ id: req.session.user.id, user_type: req.session.user.user_type });
+  console.log("SESSION:", req.session); // 👈 move here
+  console.log("[AUTH DEBUG] /me sessionID:", req.sessionID);
+  console.log("[AUTH DEBUG] /me cookie header:", req.headers.cookie || null);
+  console.log("[AUTH DEBUG] /me req.session.user:", req.session?.user || null);
+
+  if (!req.session?.user) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  res.json({
+    id: req.session.user?.id || null,
+    email: req.session.user?.email,
+    fullname: req.session.user?.fullname,
+    user_type: req.session.user?.user_type || null
+  });
 });
 
 // GET /user/:id
@@ -181,13 +226,13 @@ router.get('/users/:id', async (req, res) => {
       return res.status(400).json({ error: 'User ID is required' });
     }
 
-    const [user] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
+    const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
 
-    if (!user) {
+    if (rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json(user);
+    res.json(rows[0]);
   } catch (err) {
     console.error('Error fetching user:', err);
     res.status(500).json({ error: 'Server error' });

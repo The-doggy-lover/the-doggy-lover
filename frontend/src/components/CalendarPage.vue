@@ -198,20 +198,51 @@ export default {
 
     async syncToGoogle() {
       this.syncing = true;
+
       try {
-        await axios.post(
-          `${backendUrl}/api/meetings/sync-calendar`,
-          null,
+        // 🔥 Step 1: get all pets
+        const { data: pets } = await axios.get(
+          `${backendUrl}/api/pets/pets`,
           { withCredentials: true }
         );
+
+        // 🔥 Step 2: convert meetings → correct format
+        const events = this.meetings.map(m => {
+          const pet = pets.find(p => p.pet_name === m.pet_name);
+
+          if (!pet) {
+            console.log("❌ Pet not found for:", m.pet_name);
+            return null;
+          }
+
+          return {
+            pet_id: pet.id,   // ✅ FIXED
+            date: m.date,
+            time: m.time
+          };
+        }).filter(e => e !== null);
+
+        console.log("🔥 Sending events:", events);
+
+        // 🔥 Step 3: send to backend
+        await axios.post(
+          `${backendUrl}/api/meetings/sync-calendar`,
+          { calendarEvents: events },
+          { withCredentials: true }
+        );
+
+        console.log("✅ Sync success");
+
       } catch (err) {
         console.error('Sync failed:', err);
+
         const msg = err.response?.data?.error || '';
         if (msg.includes('No Google tokens')) {
           window.location.href = `${backendUrl}/api/auth/google`;
         } else {
           alert('Failed to sync calendar. Check console for details.');
         }
+
       } finally {
         this.syncing = false;
       }

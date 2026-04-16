@@ -63,33 +63,38 @@ async function reverseGeocode(latlngString) {
 }
 
 
-router.get('/browse', (req, res) => {
-  db.query(
-    `SELECT id, pet_name, breed, age, gender, description, pet_photo, isOnline, location, location_coords, vaccinated, birthday, available_start_time, available_end_time
-     FROM pets
-     WHERE isOnline = 1`,
-    (err, rows) => {
-      if (err) {
-        console.error('DB error on GET /pets/browse:', err);
-        return res.status(500).json({ error: 'Database error' });
-      }
-      res.json(rows);
-    }
-  );
+router.get('/browse', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT id, pet_name, breed, age, gender, description, pet_photo, isOnline, location, location_coords, vaccinated, birthday, available_start_time, available_end_time
+       FROM pets
+       WHERE isOnline = 1`
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error('DB error on GET /pets/browse:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 // GET /api/pets/recent
-router.get('/recent', (req, res) => {
-  const sql = `
-    SELECT * FROM pets
-    WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-    ORDER BY RAND()
-    LIMIT 5
-  `;
-  db.query(sql, (err, results) => {
-    if (err) return res.status(500).json({ error: 'DB error' });
+router.get('/recent', async (req, res) => {
+  try {
+    const sql = `
+      SELECT * FROM pets
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+      ORDER BY RAND()
+      LIMIT 5
+    `;
+
+    const [results] = await db.query(sql);
+
     res.json(results);
-  });
+  } catch (err) {
+    console.error('DB error on GET /pets/recent:', err);
+    res.status(500).json({ error: 'DB error' });
+  }
 });
 
 // GET /api/pets (all)
@@ -114,6 +119,7 @@ router.post('/generate-description', async (req, res) => {
     }
 
     const prompt = `Write one short sentence for introducing a ${gender} ${breed} named ${pet_name}, age ${age}.`;
+    console.log("KEY:", process.env.OPENAI_API_KEY);
 
     // Call OpenAI REST API (keep model choice as you prefer)
     const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -132,7 +138,11 @@ router.post('/generate-description', async (req, res) => {
     const openaiData = await openaiRes.json();
     const generatedText = openaiData?.choices?.[0]?.message?.content?.trim() || '';
 
-    res.json({ description: generatedText });
+    // res.json({ description: generatedText });
+    res.json({ description: "This is a random description. This will have to do for the time being" });
+
+    console.log("STATUS:", openaiRes.status);
+    console.log("OPENAI DATA:", JSON.stringify(openaiData, null, 2));
   } catch (err) {
     console.error('OpenAI error:', err);
     res.status(500).json({ error: 'Failed to generate description' });
@@ -215,6 +225,21 @@ router.post('/add-pet', upload.single('photo'), async (req, res) => {
       ]
     );
 
+    console.log("QUERY PARAM userId:", userId);
+    console.log("BREED:", breed);
+    console.log("INSERT VALUES:", {
+      userId,
+      pet_name,
+      breed,
+      age,
+      gender,
+      description,
+      petPhoto,
+      isOnline,
+      humanLocation,
+      rawCoords
+    });
+
     res.status(201).json({ message: 'Pet added successfully' });
 
   } catch (err) {
@@ -268,23 +293,29 @@ router.get('/my-pets', async (req, res) => {
 });
 
 // PATCH /api/pets/:id/visibility
-router.patch('/:id/visibility', (req, res) => {
-  const userId = req.session.user?.id;
-  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-  const petId = req.params.id;
-  const isOnline = req.body.isOnline ? 1 : 0;
-  db.query(
-    'UPDATE pets SET isOnline = ? WHERE id = ? AND user_id = ?',
-    [isOnline, petId, userId],
-    (err, result) => {
-      if (err) {
-        console.error('Toggle visibility error:', err);
-        return res.status(500).json({ error: 'Database error' });
-      }
-      if (result.affectedRows === 0) return res.status(404).json({ error: 'Pet not found or not yours' });
-      res.json({ message: 'Visibility updated', isOnline });
+router.patch('/:id/visibility', async (req, res) => {
+  try {
+    const userId = req.session.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+    const petId = req.params.id;
+    const isOnline = req.body.isOnline ? 1 : 0;
+
+    const [result] = await db.query(
+      'UPDATE pets SET isOnline = ? WHERE id = ? AND user_id = ?',
+      [isOnline, petId, userId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Pet not found or not yours' });
     }
-  );
+
+    res.json({ message: 'Visibility updated', isOnline });
+
+  } catch (err) {
+    console.error('Toggle visibility error:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 

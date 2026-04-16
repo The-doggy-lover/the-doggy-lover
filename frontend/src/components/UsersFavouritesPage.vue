@@ -32,7 +32,7 @@
         <div v-for="pet in pets" :key="pet.id" class="fav-card">
           <div class="pet-image-container">
             <img
-              :src="process.env.VUE_APP_API_URL + '/pet-pics/' + pet.pet_photo"
+              :src="backendUrl + '/pet-pics/' + pet.pet_photo"
               alt="Photo of {{ pet.pet_name }}"
               class="pet-image"
             />
@@ -85,7 +85,8 @@ export default {
     return {
       pets: [],
       sidebarOpen: false,
-      favourites: []
+      favourites: [],
+      backendUrl: process.env.VUE_APP_API_URL
     }
   },
   methods: {

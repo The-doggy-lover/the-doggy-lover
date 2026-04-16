@@ -44,22 +44,29 @@
           </button>
         </div>
 
-        <!-- Desktop Grid View -->
-        <div v-if="!isMobile && upcomingMeetings.length > 0" class="meetings-grid">
-          <div v-for="meeting in upcomingMeetings" :key="meeting.id" class="meeting-card">
-            <div class="meet-details">
-              <img class="calendar-icon" src="/calendar-icon.png" alt="calendar icon" />
-              <div class="meeting-details">
-                <strong>{{ meeting.pet_name }}</strong>
-                on {{ formatDate(meeting.date) }} at {{ formatTime(meeting.time) }}
-                <span v-if="meeting.confirmation === 0" class="declined">(declined)</span>
+        <div v-if="upcomingMeetings && upcomingMeetings.length > 0">
+          <div v-if="!isMobile" class="meetings-grid">
+            <div v-for="meeting in upcomingMeetings" :key="meeting.id" class="meeting-card">
+              <div class="meet-details">
+                <img class="calendar-icon" src="/calendar-icon.png" alt="calendar icon" />
+                <div class="meeting-details">
+                  <strong>{{ meeting.pet_name }}</strong>
+                  on {{ formatDate(meeting.date) }} at {{ formatTime(meeting.time) }}
+                  <span v-if="Number(meeting.confirmation) === 0" class="declined">(declined)</span>
+                </div>
               </div>
             </div>
           </div>
+          <div v-else class="mobile-meetings-button">
+            <button @click="goToCalendar" class="mobile-meeting-btn">
+              Your Meetings ({{ upcomingMeetings.length }})
+            </button>
+          </div>
         </div>
 
-        <!-- Fallback message -->
-        <div v-if="upcomingMeetings.length === 0">No upcoming meetings.</div>
+        <div v-else>
+          No upcoming meetings.
+        </div>
       </div>
 
 
@@ -125,7 +132,7 @@
             <img
               v-if="pet.pet_photo"
               class="pet-photo"
-              :src="process.env.VUE_APP_API_URL + '/pet-pics/' + pet.pet_photo"
+              :src="backendUrl + '/pet-pics/' + pet.pet_photo"
               :alt="`Photo of ${pet.pet_name}`"
             />
             <div class="pet-details">
@@ -217,17 +224,25 @@ export default {
     },
     upcomingMeetings() {
       const now = new Date();
-      return this.meetings.filter(meeting => {
-        if (!meeting.date || !meeting.time) return false;
-        const [y, m, d] = meeting.date.split('-').map(Number);
-        const [h, min] = meeting.time.split(':').map(Number);
-        const meetingTime = new Date(y, m - 1, d, h, min);
-        return meetingTime > now;
-      }).sort((a, b) => {
-        const aTime = new Date(`${a.date}T${a.time}`);
-        const bTime = new Date(`${b.date}T${b.time}`);
-        return aTime - bTime;
-      });
+
+      console.log("Raw meetings:", this.meetings);
+
+      return (Array.isArray(this.meetings) ? this.meetings : [])
+        .filter(meeting => {
+          if (!meeting.date || !meeting.time) return false;
+
+          const dateStr = String(meeting.date).slice(0, 10);   // YYYY-MM-DD
+          const timeStr = String(meeting.time).slice(0, 5);    // HH:MM
+
+          const meetingTime = new Date(`${dateStr}T${timeStr}`);
+          return !isNaN(meetingTime) && meetingTime >= now;
+        })
+        .sort((a, b) => {
+          const aDate = new Date(`${String(a.date).slice(0, 10)}T${String(a.time).slice(0, 5)}`);
+          const bDate = new Date(`${String(b.date).slice(0, 10)}T${String(b.time).slice(0, 5)}`);
+          return aDate - bDate;
+        });
+        
     },
     isMobile() {
       return this.windowWidth <= 768;
@@ -344,13 +359,13 @@ export default {
     },
     async fetchRecentPets() {
       // Pets added in the past week, random limit
-      const { data } = await axios.get(`${backendUrl}/api/pets/pets/recent`, { withCredentials: true });
+      const { data } = await axios.get(`${backendUrl}/api/pets/recent`, { withCredentials: true });
       this.recentPets = data;
     },
     async togglePetStatus(pet) {
       const newIsOnline = !pet.isOnline;
       await axios.patch(
-        `${backendUrl}/api/pets/pets/${pet.id}/visibility`,
+        `${backendUrl}/api/pets/${pet.id}/visibility`,
         { isOnline: newIsOnline },
         { withCredentials: true }
       );
@@ -365,7 +380,7 @@ export default {
     async fetchPets() {
       try {
         const { data } = await axios.get(
-          `${backendUrl}/api/pets/pets/browse`,
+          `${backendUrl}/api/pets/browse`,
           { withCredentials: true }
         );
         this.pets = data;
@@ -460,7 +475,6 @@ export default {
     window.addEventListener('resize', () => {
       this.windowWidth = window.innerWidth;
     });
-    this.fetchMeetings();
   },
   activated() {
   this.fetchFavourites(); // re-fetch favourites when component becomes active

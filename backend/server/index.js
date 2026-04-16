@@ -16,8 +16,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.set('trust proxy', 1);
-
 app.use(cors({
   origin: true,
   credentials: true
@@ -25,14 +23,17 @@ app.use(cors({
 
 app.options(/.*/, cors());
 
+app.set('trust proxy', 1);
+
 app.use(session({
   name: 'pmp.sid',
   secret: process.env.SESSION_SECRET || 'dev-secret',
   resave: false,
   saveUninitialized: false,
+  proxy: true, // 🔥 ADD THIS LINE
   cookie: {
-    secure: process.env.VERCEL ? true : false,
-    sameSite: process.env.VERCEL ? 'none' : 'lax'
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
 }));
 
@@ -41,7 +42,10 @@ app.use((req, res, next) => {
   next();
 });
 
+console.log("ENV:", process.env.NODE_ENV);
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get(['/', '/health', '/api/health'], (req, res) => {
   return res.status(200).json({
@@ -65,7 +69,7 @@ app.use((req, res) => {
 //This is a comment by Amit
 
 if (!process.env.VERCEL) {
-  const PORT = process.env.PORT || 5000;
+  const PORT = process.env.PORT || 5001;
 
   app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);

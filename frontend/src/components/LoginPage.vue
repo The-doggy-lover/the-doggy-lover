@@ -37,7 +37,7 @@ export default {
       const name = decoded.name;
 
       try {
-        const res = await fetch("http://localhost:3000/google-check", {
+        const res = await fetch("http://localhost:5001/google-check", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, fullname: name }),

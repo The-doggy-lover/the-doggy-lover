@@ -2,6 +2,13 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../lib/db');
+const { google } = require('googleapis');
+
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  "http://localhost:5001/api/auth/google/callback"
+);
 
 // POST /api/meetings/book-appointment
 router.post('/book-appointment', async (req, res) => {
@@ -164,7 +171,10 @@ router.patch('/:id/confirmation', async (req, res) => {
 // GET /sync-calendar
 router.get('/sync-calendar', async (req, res) => {
   try {
-    const userId = req.session.userId;
+    const userId = req.session.user?.id;
+    console.log("SESSION:", req.session);
+    console.log("USER IN SESSION:", req.session.user);
+    console.log("USER ID:", req.session.user?.id);
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
     const [rows] = await db.query('SELECT * FROM meetings WHERE user_id = ?', [userId]);
@@ -175,30 +185,86 @@ router.get('/sync-calendar', async (req, res) => {
   }
 });
 
-
-// POST /sync-calendar
 router.post('/sync-calendar', async (req, res) => {
   try {
-    const userId = req.session.userId;
-    const { calendarEvents } = req.body; // expects array of events
+    const userId = req.session.user?.id;
+    const { calendarEvents } = req.body;
+
+    console.log("🟢 User ID:", userId);
+    console.log("📦 Incoming events:", calendarEvents);
 
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     if (!calendarEvents || !Array.isArray(calendarEvents)) {
       return res.status(400).json({ error: 'Invalid events data' });
     }
 
-    for (const event of calendarEvents) {
-      await db.query(
-        `INSERT INTO meetings (user_id, title, date, time)
-         VALUES (?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE title=?, date=?, time=?`,
-        [userId, event.title, event.date, event.time, event.title, event.date, event.time]
-      );
+    // ✅ Get tokens from session
+    const tokens = req.session.googleTokens;
+    if (!tokens) {
+      return res.status(400).json({ error: 'No Google tokens' });
     }
 
+    const { google } = require('googleapis');
+
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI
+    );
+
+    // ✅ Attach tokens
+    oauth2Client.setCredentials(tokens);
+
+    // ✅ Create calendar instance
+    const calendar = google.calendar({
+      version: 'v3',
+      auth: oauth2Client
+    });
+
+    for (const event of calendarEvents) {
+      if (!event.pet_id || !event.date || !event.time) continue;
+
+      const cleanDate = event.date.slice(0, 10);
+
+      // ✅ Save to DB
+      await db.query(
+        `INSERT INTO meetings (user_id, pet_id, date, time)
+         VALUES (?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE date=?, time=?`,
+        [userId, event.pet_id, cleanDate, event.time, cleanDate, event.time]
+      );
+
+      // 🔥 FIXED TIME FORMAT
+      const formattedTime = event.time.split(':').slice(0, 2).join(':') + ':00';
+
+      // optional: make it 30 min long
+      const endTime = new Date(`${cleanDate}T${formattedTime}`);
+      endTime.setMinutes(endTime.getMinutes() + 30);
+
+      // ✅ Add to Google Calendar
+      await calendar.events.insert({
+        calendarId: 'primary',
+        requestBody: {
+          summary: `Meeting with pet ${event.pet_id}`,
+          start: {
+            dateTime: `${cleanDate}T${formattedTime}`,
+            timeZone: 'Asia/Kolkata',
+          },
+          end: {
+            dateTime: endTime.toISOString(),
+            timeZone: 'Asia/Kolkata',
+          },
+        },
+      });
+
+      console.log("📅 Added to Google Calendar:", event);
+    }
+
+    console.log("✅ Sync completed");
     res.json({ message: 'Calendar synced successfully' });
+
   } catch (err) {
-    console.error('Error syncing calendar:', err);
+    console.error('💥 Error syncing calendar:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
