@@ -7,7 +7,7 @@ const { google } = require('googleapis');
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  "http://localhost:5001/api/auth/google/callback"
+  "https://the-doggy-lover-backend.vercel.app/api/auth/google/callback"
 );
 
 // POST /api/meetings/book-appointment

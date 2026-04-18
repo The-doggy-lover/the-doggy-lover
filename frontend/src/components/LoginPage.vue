@@ -37,7 +37,7 @@ export default {
       const name = decoded.name;
 
       try {
-        const res = await fetch("http://localhost:5001/google-check", {
+        const res = await fetch("https://the-doggy-lover-backend.vercel.app/google-check", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, fullname: name }),
