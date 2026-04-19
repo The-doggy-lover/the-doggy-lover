@@ -142,7 +142,7 @@ export default {
     },
     async fetchPets() {
       try {
-        const { data } = await axios.get(`${backendUrl}/api/pets/pets`, { withCredentials: true }, {
+        const { data } = await axios.get(`${backendUrl}api/pets/pets`, { withCredentials: true }, {
           
         })
         this.pets = data
@@ -152,7 +152,7 @@ export default {
     },
     async fetchBreedOptions() {
       try {
-        const { data } = await axios.get(`${backendUrl}/api/breeds/breeds`, { withCredentials: true });
+        const { data } = await axios.get(`${backendUrl}api/breeds/breeds`, { withCredentials: true });
         this.breedOptions = data;
       } catch (err) {
         console.error('Error fetching breeds:', err);
@@ -183,7 +183,7 @@ export default {
     async toggleFavourite(petId) {
       try {
         const response = await axios.patch(
-          `${backendUrl}/api/pets/users/${this.user.id}/favourites`,
+          `${backendUrl}api/pets/users/${this.user.id}/favourites`,
           { petId },
           { withCredentials: true }
         );
@@ -200,7 +200,7 @@ export default {
     async fetchFavourites() {
       try {
         const { data } = await axios.get(
-          `${backendUrl}/api/pets/users/${this.user.id}/favourites`,
+          `${backendUrl}api/pets/users/${this.user.id}/favourites`,
           { withCredentials: true }
         );
         // previously you did:

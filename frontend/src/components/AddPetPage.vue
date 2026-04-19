@@ -156,14 +156,14 @@ export default {
       this.$emit('change-page', pageName);
     },
     async fetchBreeds() {
-      const res = await axios.get(`${backendUrl}/api/breeds/breeds`, { withCredentials: true });
+      const res = await axios.get(`${backendUrl}api/breeds/breeds`, { withCredentials: true });
       this.breeds = res.data;
     },
     
     async addNewBreed() {
       if (!this.newBreed) return;
       try {
-        const res = await axios.post(`${backendUrl}/api/breeds/breeds`, { name: this.newBreed }, { withCredentials: true },);
+        const res = await axios.post(`${backendUrl}api/breeds/breeds`, { name: this.newBreed }, { withCredentials: true },);
         this.breeds = (res.data);
         this.selectedBreed = this.newBreed;
         this.newBreed = '';
@@ -190,7 +190,7 @@ export default {
 
       try {
         const response = await axios.post(
-          `${backendUrl}/api/pets/generate-description`,
+          `${backendUrl}api/pets/generate-description`,
           {
             pet_name: name,
             selectedBreed: selected,
@@ -275,7 +275,7 @@ export default {
           console.log(pair[0], pair[1]);
         }
 
-        const response = await axios.post(`${backendUrl}/api/pets/add-pet`, formData, {
+        const response = await axios.post(`${backendUrl}api/pets/add-pet`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }},

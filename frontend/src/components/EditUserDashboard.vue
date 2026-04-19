@@ -93,7 +93,7 @@ export default {
     async updateUser() {
       try {
         const response = await axios.patch(
-          `${backendUrl}/api/auth/users/${this.user.id}`,
+          `${backendUrl}api/auth/users/${this.user.id}`,
           this.form,
           { withCredentials: true }
         );

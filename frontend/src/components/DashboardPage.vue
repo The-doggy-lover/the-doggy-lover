@@ -269,7 +269,7 @@ export default {
     async fetchFavourites() {
       try {
         const { data } = await axios.get(
-          `${backendUrl}/api/pets/users/${this.user.id}/favourites`,
+          `${backendUrl}api/pets/users/${this.user.id}/favourites`,
           { withCredentials: true }
         );
         // previously you did:
@@ -285,7 +285,7 @@ export default {
     },
     async fetchMeetings() {
       const { data: user } = await axios.get(
-        `${backendUrl}/api/auth/me`,
+        `${backendUrl}api/auth/me`,
         { withCredentials: true }
       );
       if (user.user_type === 'Pet Owner') {
@@ -295,17 +295,17 @@ export default {
       }
     },
     async fetchOwnerMeetings() {
-      const { data } = await axios.get(`${backendUrl}/api/meetings/requests`, { withCredentials:true });
+      const { data } = await axios.get(`${backendUrl}api/meetings/requests`, { withCredentials:true });
       this.meetings = data;
     },
     async fetchLoverMeetings() {
-      const { data } = await axios.get(`${backendUrl}/api/meetings/user`, { withCredentials:true });
+      const { data } = await axios.get(`${backendUrl}api/meetings/user`, { withCredentials:true });
       this.meetings = data;
     },
     async toggleFavourite(petId) {
       try {
         const response = await axios.patch(
-          `${backendUrl}/api/pets/users/${this.user.id}/favourites`,
+          `${backendUrl}pets/users/${this.user.id}/favourites`,
           { petId },
           { withCredentials: true }
         );
@@ -329,14 +329,14 @@ export default {
     },
     async initialize() {
       try {
-        const userResponse = await fetch(`${backendUrl}/api/auth/check-auth`, { credentials: 'include' });
+        const userResponse = await fetch(`${backendUrl}api/auth/check-auth`, { credentials: 'include' });
         const userData = await userResponse.json();
         this.userId = userData.id;
 
-        const { data: me } = await axios.get(`${backendUrl}/api/auth/me`, { withCredentials: true });
+        const { data: me } = await axios.get(`${backendUrl}api/auth/me`, { withCredentials: true });
         this.userType = me.user_type;
 
-        const petsResponse = await fetch(`${backendUrl}/api/pets/pets`);
+        const petsResponse = await fetch(`${backendUrl}api/pets/pets`);
         this.pets = await petsResponse.json();
 
         await this.fetchMyPets();
@@ -354,18 +354,18 @@ export default {
       this.$emit('profile-updated', updatedUser);
     },
     async fetchMyPets() {
-      const { data } = await axios.get(`${backendUrl}/api/pets/my-pets`, { withCredentials: true });
+      const { data } = await axios.get(`${backendUrl}api/pets/my-pets`, { withCredentials: true });
       this.myPets = data;
     },
     async fetchRecentPets() {
       // Pets added in the past week, random limit
-      const { data } = await axios.get(`${backendUrl}/api/pets/recent`, { withCredentials: true });
+      const { data } = await axios.get(`${backendUrl}api/pets/recent`, { withCredentials: true });
       this.recentPets = data;
     },
     async togglePetStatus(pet) {
       const newIsOnline = !pet.isOnline;
       await axios.patch(
-        `${backendUrl}/api/pets/${pet.id}/visibility`,
+        `${backendUrl}api/pets/${pet.id}/visibility`,
         { isOnline: newIsOnline },
         { withCredentials: true }
       );
@@ -380,7 +380,7 @@ export default {
     async fetchPets() {
       try {
         const { data } = await axios.get(
-          `${backendUrl}/api/pets/browse`,
+          `${backendUrl}api/pets/browse`,
           { withCredentials: true }
         );
         this.pets = data;
@@ -390,7 +390,7 @@ export default {
     },
     async fetchBreedOptions() {
       try {
-        const { data } = await axios.get(`${backendUrl}/api/breeds/breeds`, { withCredentials: true });
+        const { data } = await axios.get(`${backendUrl}api/breeds/breeds`, { withCredentials: true });
         this.breedOptions = data;
       } catch (err) {
         console.error('Error fetching breeds:', err);
@@ -420,7 +420,7 @@ export default {
       this.filters = { ...this.filters };
     },
     async load() {
-      const url = backendUrl + (this.userType === 'Pet Lover' ? '/api/meetings/user' : '/api/meetings/requests');
+      const url = backendUrl + (this.userType === 'Pet Lover' ? 'api/meetings/user' : 'api/meetings/requests');
 
       try {
         const { data } = await axios.get(`${url}`, {

@@ -117,7 +117,6 @@ export default {
 /* Container and card */
 .container {
   min-height: 90vh;
-  background-color: #f9fafb; /* gray-50 */
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -114,7 +114,7 @@ export default {
   async mounted() {
     try {
       // 1) fetch the logged‑in user’s type
-      const { data: me } = await axios.get(`${backendUrl}/api/auth/me`, { withCredentials: true });
+      const { data: me } = await axios.get(`${backendUrl}api/auth/me`, { withCredentials: true });
       this.userType = me.user_type;
     } catch (e) {
       console.error('Couldn’t fetch user type', e);
@@ -150,7 +150,7 @@ export default {
     },
     async initialize() {
       try {
-        const { data: me } = await axios.get(`${backendUrl}/api/auth/me`, { withCredentials: true });
+        const { data: me } = await axios.get(`${backendUrl}api/auth/me`, { withCredentials: true });
         this.userType = me.user_type;
       } catch (e) {
         console.error('Couldn’t fetch user type', e);
@@ -163,7 +163,7 @@ export default {
       setInterval(this.load, 30000);
     },
     async load() {
-      const url = backendUrl + (this.userType === 'Pet Lover' ? '/api/meetings/user' : '/api/meetings/requests');
+      const url = backendUrl + (this.userType === 'Pet Lover' ? 'api/meetings/user' : 'api/meetings/requests');
 
       try {
         const { data } = await axios.get(`${url}`, {
@@ -202,7 +202,7 @@ export default {
       try {
         // 🔥 Step 1: get all pets
         const { data: pets } = await axios.get(
-          `${backendUrl}/api/pets/pets`,
+          `${backendUrl}api/pets/pets`,
           { withCredentials: true }
         );
 
@@ -226,7 +226,7 @@ export default {
 
         // 🔥 Step 3: send to backend
         await axios.post(
-          `${backendUrl}/api/meetings/sync-calendar`,
+          `${backendUrl}api/meetings/sync-calendar`,
           { calendarEvents: events },
           { withCredentials: true }
         );
@@ -238,7 +238,7 @@ export default {
 
         const msg = err.response?.data?.error || '';
         if (msg.includes('No Google tokens')) {
-          window.location.href = `${backendUrl}/api/auth/google`;
+          window.location.href = `${backendUrl}api/auth/google`;
         } else {
           alert('Failed to sync calendar. Check console for details.');
         }

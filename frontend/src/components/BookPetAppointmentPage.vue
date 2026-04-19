@@ -89,7 +89,7 @@ export default {
     }
   },
   mounted() {
-    fetch(`${backendUrl}/api/pets/${this.petId}`, {
+    fetch(`${backendUrl}api/pets/${this.petId}`, {
       credentials: 'include'
     })
     .then(res => res.json())
@@ -176,7 +176,7 @@ export default {
       }
 
       try {
-        const response = await fetch(`${backendUrl}/api/meetings/book-appointment`, {
+        const response = await fetch(`${backendUrl}api/meetings/book-appointment`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -200,7 +200,7 @@ export default {
     async loadBookedSlots() {
       if (!this.date) return;
       try {
-        const res = await fetch(`${backendUrl}/api/meetings/booked-slots?pet_id=${this.petId}&date=${this.date}`, {
+        const res = await fetch(`${backendUrl}api/meetings/booked-slots?pet_id=${this.petId}&date=${this.date}`, {
           credentials: 'include'
         });
         const data = await res.json();

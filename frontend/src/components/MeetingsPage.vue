@@ -80,7 +80,7 @@ export default {
     },
     async load() {
       try {
-        const { data } = await axios.get(`${backendUrl}/api/meetings/requests`, { withCredentials: true });
+        const { data } = await axios.get(`${backendUrl}api/meetings/requests`, { withCredentials: true });
         this.requests = data;
       } catch (e) {
         console.error('Load requests failed', e);
@@ -119,7 +119,7 @@ export default {
     async confirm(id, yes) {
       try {
         await axios.patch(
-          `${backendUrl}/api/meetings/${id}/confirmation`,
+          `${backendUrl}api/meetings/${id}/confirmation`,
           { confirmation: yes },
           { withCredentials: true }
         );
