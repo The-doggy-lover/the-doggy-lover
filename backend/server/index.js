@@ -17,7 +17,7 @@ app.use((req, res, next) => {
 });
 
 app.use(cors({
-  origin: "the-doggy-lover.vercel.app",
+  origin: "https://the-doggy-lover.vercel.app",
   credentials: true
 }));
 
