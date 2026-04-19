@@ -81,7 +81,7 @@ export default {
 
         console.log('📤 Sending to backend:', email, fullname);
 
-        const res = await fetch(`${backendUrl}/api/auth/google-login`, {
+        const res = await fetch(`${backendUrl}api/auth/google-login`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
