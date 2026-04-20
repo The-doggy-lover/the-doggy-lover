@@ -152,7 +152,7 @@ export default {
       }
       try {
         const response = await axios.patch(
-          `${backendUrl}api/pets/${this.pet.id}`,
+          `${backendUrl}/api/pets/${this.pet.id}`,
           this.form,
           { withCredentials: true }
         );

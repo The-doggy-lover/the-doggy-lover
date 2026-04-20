@@ -209,7 +209,7 @@ export default {
 
         // Submit to backend
         const { data } = await axios.post(
-          `${backendUrl}api/auth/signup`,
+          `${backendUrl}/api/auth/signup`,
           this.form,
           { withCredentials: true }
         );

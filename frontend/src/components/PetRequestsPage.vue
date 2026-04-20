@@ -71,7 +71,7 @@ export default {
     },
     async load() {
       try {
-        const { data } = await axios.get(`${backendUrl}api/meetings/user`, { withCredentials: true });
+        const { data } = await axios.get(`${backendUrl}/api/meetings/user`, { withCredentials: true });
         this.requests = data;
       } catch (e) {
         console.error('Failed to load requests', e);

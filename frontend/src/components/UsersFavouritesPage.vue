@@ -103,7 +103,7 @@ export default {
       immediate: true,
       handler(newUser) {
         if (newUser && newUser.id) {
-          axios.get(`${backendUrl}api/pets/users/${newUser.id}/favourites`, {
+          axios.get(`${backendUrl}/api/pets/users/${newUser.id}/favourites`, {
             withCredentials: true
           })
           .then(res => {

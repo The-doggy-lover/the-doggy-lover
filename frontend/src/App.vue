@@ -189,7 +189,7 @@ export default {
       //   this.changePage('DashboardPage');
       // }
       axios
-      .get(`${process.env.VUE_APP_API_URL}api/auth/users/email/${this.googleEmail}`, { withCredentials: true })
+      .get(`${process.env.VUE_APP_API_URL}/api/auth/users/email/${this.googleEmail}`, { withCredentials: true })
       .then(res => {
         this.loggedInUser = res.data.user; // ✅ will now include phone_number
         if (!this.loggedInUser?.user_type) {
